@@ -22,3 +22,17 @@ type FlowSegmentData struct {
 type TrafficAPIResponse struct {
 	FlowSegmentData FlowSegmentData `json:"flowSegmentData"`
 }
+
+func (f FlowSegmentData) Congestion() float64 {
+	if f.FreeFlowSpeed == 0 {
+		return 0
+	}
+	raw := 1.0 - float64(f.CurrentSpeed)/float64(f.FreeFlowSpeed)
+	if raw < 0 {
+		raw = 0
+	}
+	if raw > 1 {
+		raw = 1
+	}
+	return raw
+}

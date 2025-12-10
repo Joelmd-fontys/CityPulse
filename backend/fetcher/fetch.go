@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"os"
 )
@@ -38,4 +39,39 @@ func Fetch(lat, lon string) (*TrafficAPIResponse, error) {
 	}
 
 	return &data, nil
+}
+
+func FetchArea(centerLat, centerLon float64) ([][]float64, error) {
+	const halfSizeMeters = 500.0 // 1 km total → 500 m each direction
+	const stepMeters = 200.0     // ~200 m step
+
+	latStep := stepMeters / 111000.0
+	latRadius := halfSizeMeters / 111000.0
+
+	lonMeterPerDeg := 111000.0 * math.Cos(centerLat*math.Pi/180.0)
+	lonStep := stepMeters / lonMeterPerDeg
+	lonRadius := halfSizeMeters / lonMeterPerDeg
+
+	var grid [][]float64
+
+	for dLat := -latRadius; dLat <= latRadius+1e-9; dLat += latStep {
+		var row []float64
+		for dLon := -lonRadius; dLon <= lonRadius+1e-9; dLon += lonStep {
+			lat := centerLat + dLat
+			lon := centerLon + dLon
+
+			resp, err := Fetch(
+				fmt.Sprintf("%.6f", lat),
+				fmt.Sprintf("%.6f", lon),
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			row = append(row, resp.FlowSegmentData.Congestion())
+		}
+		grid = append(grid, row)
+	}
+
+	return grid, nil
 }
