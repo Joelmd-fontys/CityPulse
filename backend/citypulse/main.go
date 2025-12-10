@@ -1,10 +1,9 @@
 package main
 
 import (
+	"backend/fetcher"
 	"fmt"
 	"os"
-
-	"backend/gtfs" // adjust to your module name
 
 	"github.com/joho/godotenv"
 )
@@ -18,11 +17,13 @@ func main() {
 	lat := os.Getenv("CITY_LAT")
 	lon := os.Getenv("CITY_LON")
 
-	data, err := gtfs.Fetch(lat, lon)
+	data, err := fetcher.Fetch(lat, lon)
 	if err != nil {
-		fmt.Println("fetch error:", err)
+		fmt.Println(err)
 		return
 	}
 
-	fmt.Println(data)
+	fmt.Println("Speed:", data.FlowSegmentData.CurrentSpeed)
+	fmt.Println("Free flow:", data.FlowSegmentData.FreeFlowSpeed)
+	fmt.Println("First coordinate:", data.FlowSegmentData.Coordinates.Coordinate[0])
 }

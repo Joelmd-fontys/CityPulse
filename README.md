@@ -9,7 +9,7 @@
 # CityPulse
 
 A real-time urban mobility heatmap engine built using Go, Python, and Rust.  
-CityPulse ingests live GTFS-Realtime transit feeds, transforms millions of location updates into a spatial density grid, and visualizes the flow of a city in motion.
+CityPulse ingests live real-time road traffic data from TomTom’s Traffic Flow API, transforms segment speeds & congestion levels into a spatial density grid, and visualizes the movement and breathing pattern of a city street network.
 
 This project is structured as a multi-language learning journey:
 
@@ -88,11 +88,12 @@ Implement the live backend that powers CityPulse by fetching, processing, and st
 
 ## Components
 
-### 1. GTFS-Realtime Fetcher
-- Polls `vehicle_positions.pb` at fixed intervals  
-- Parses protobuf messages  
-- Extracts `(lat, lon, route_id, timestamp)`  
-- Maintains current in-memory vehicle state  
+### 1. Traffic Flow Fetcher (TomTom API)
+- Polls TomTom Traffic Flow API at fixed intervals 
+- Fetches live congestion + road segment geometry (polyline coordinates)  
+- Extracts `currentSpeed, freeFlowSpeed, congestion level, list of coordinates`  
+- Converts each road segment into one or more heatmap cells
+- Maintains current in-memory traffic snapshot for the entire city
 
 ### 2. Spatial Density Grid
 - Define bounding box for the city  
@@ -200,7 +201,7 @@ Unlock analytics and forecasting by storing historical data.
 ### Core Milestones
 
 [ ] Phase 1 — Go Backend
-[ ] GTFS fetcher
+[ ] API fetcher
 [ ] Density grid engine
 [ ] API + WebSocket server
 [ ] Minimal output
